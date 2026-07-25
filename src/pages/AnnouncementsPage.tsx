@@ -8,15 +8,17 @@ export const AnnouncementsPage: React.FC = () => {
 
   useEffect(() => {
     api.get('/api/announcements/')
-      .then((res) => setAnnouncements(res.data))
-      .catch(() => {})
+      .then((res) => {
+        const data = Array.isArray(res.data) ? res.data : res.data.results || [];
+        setAnnouncements(data);
+      }).catch(() => { })
       .finally(() => setLoading(false));
   }, []);
 
   return (
     <div className="min-h-screen bg-light-bg dark:bg-dark-bg transition-colors duration-300 pt-28 pb-16">
       <div className="max-w-4xl mx-auto px-4 sm:px-6">
-        
+
         {/* Header */}
         <div className="text-center mb-12">
           <span className="text-xs font-bold text-church-gold uppercase tracking-wider block mb-1">Board</span>
@@ -31,7 +33,7 @@ export const AnnouncementsPage: React.FC = () => {
         ) : announcements.length > 0 ? (
           <div className="space-y-6">
             {announcements.map((ann) => (
-              <div 
+              <div
                 key={ann.id}
                 className="p-6 rounded-3xl bg-white dark:bg-dark-card border border-slate-205 dark:border-slate-800 shadow-sm flex gap-4 items-start"
               >
