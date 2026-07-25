@@ -1,0 +1,95 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;1,400&family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,800;1,400&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-display: 'Playfair Display', Georgia, serif;
+  --font-serif: 'Lora', Georgia, serif;
+  
+  --color-church-blue: #081026;
+  --color-church-blue-light: #122047;
+  --color-church-gold: #D4AF37;
+  --color-church-gold-light: #F5E8C7;
+  --color-church-gold-hover: #C19A28;
+  
+  --color-light-bg: rgba(248, 250, 252, 0.88);
+  --color-light-card: rgba(255, 255, 255, 0.95);
+  
+  --color-dark-bg: rgba(8, 16, 38, 0.88);
+  --color-dark-card: rgba(18, 30, 61, 0.95);
+}
+
+/* Custom UI Classes and Utilities */
+
+@layer utilities {
+  .glassmorphism {
+    background: rgba(255, 255, 255, 0.65);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+  }
+
+  .glassmorphism-dark {
+    background: rgba(8, 16, 38, 0.65);
+    border: 1px solid rgba(212, 175, 55, 0.15);
+  }
+
+  .gold-gradient {
+    background: linear-gradient(135deg, #D4AF37 0%, #F5E8C7 50%, #BCA030 100%);
+  }
+
+  .blue-gradient {
+    background: linear-gradient(135deg, #081026 0%, #122047 100%);
+  }
+
+  /* Frosted glass page background effect with blur */
+  .bg-light-bg, .bg-dark-bg {
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
+}
+
+/* Base styles resets */
+body {
+  font-family: var(--font-sans);
+  background-color: transparent;
+  color: #1E293B;
+  overflow-x: hidden;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+body.dark {
+  background-color: transparent;
+  color: #F8FAFC;
+}
+
+/* Page scroll bar styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 4px;
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: #334155;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
+}
+
+/* Make native calendar and clock symbols clearly visible in dark inputs */
+input[type="datetime-local"]::-webkit-calendar-picker-indicator,
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator {
+  filter: invert(1) sepia(100%) saturate(10000%) hue-rotate(5deg);
+  cursor: pointer;
+  opacity: 0.85;
+  transition: opacity 0.2s ease;
+}
+input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover,
+input[type="date"]::-webkit-calendar-picker-indicator:hover,
+input[type="time"]::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+}
