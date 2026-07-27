@@ -21,9 +21,9 @@ const formatEventTime = (dateStr: string) => {
 };
 
 // Countdown timer helper component
-const CountdownTimer: React.FC<{ 
-  targetDate: string; 
-  title: string; 
+const CountdownTimer: React.FC<{
+  targetDate: string;
+  title: string;
   location: string;
   description: string;
   onTimeUp?: () => void;
@@ -39,7 +39,7 @@ const CountdownTimer: React.FC<{
         if (difference > -60000 && !notifiedRef.current) { // Trigger only within a 1-minute window of the actual start
           notifiedRef.current = true;
           if (onTimeUp) onTimeUp();
-          
+
           // Trigger HTML5 Desktop Notification
           if ('Notification' in window && Notification.permission === 'granted') {
             new Notification(`Upcoming Fellowship: ${title}`, {
@@ -84,8 +84,16 @@ export const EventsPage: React.FC = () => {
 
   useEffect(() => {
     api.get('/api/events/')
-      .then((res) => setEvents(res.data))
-      .catch(() => {})
+      .then((res) => {
+        const data = Array.isArray(res.data)
+          ? res.data
+          : Array.isArray(res.data.results)
+            ? res.data.results
+            : [];
+
+        setEvents(data);
+      })
+      .catch(() => { })
       .finally(() => setLoading(false));
   }, []);
 
@@ -105,7 +113,7 @@ export const EventsPage: React.FC = () => {
         ) : events.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {events.map((ev) => (
-              <div 
+              <div
                 key={ev.id}
                 className="group rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-dark-card overflow-hidden shadow-md flex flex-col justify-between hover:shadow-lg transition-shadow"
               >
@@ -125,8 +133,8 @@ export const EventsPage: React.FC = () => {
                         <Calendar className="w-3.5 h-3.5" />
                         <span>{new Date(ev.event_date.slice(0, 16)).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</span>
                       </div>
-                      <CountdownTimer 
-                        targetDate={ev.event_date.slice(0, 16)} 
+                      <CountdownTimer
+                        targetDate={ev.event_date.slice(0, 16)}
                         title={ev.title}
                         location={ev.location}
                         description={ev.description}
@@ -134,8 +142,8 @@ export const EventsPage: React.FC = () => {
                           addToast(`Upcoming Fellowship: "${ev.title}" has started!`, "success");
                           // Notify backend
                           api.post(`/api/events/${ev.id}/notify_members/`)
-                            .then(() => {})
-                            .catch(() => {});
+                            .then(() => { })
+                            .catch(() => { });
                         }}
                       />
                     </div>
