@@ -219,7 +219,13 @@ export const Home: React.FC = () => {
 
     api.get('/api/gallery/')
       .then((res) => {
-        setPhotos(res.data.slice(0, 6));
+        const data = Array.isArray(res.data)
+          ? res.data
+          : Array.isArray(res.data.results)
+            ? res.data.results
+            : [];
+
+        setPhotos(data.slice(0, 6));
       })
       .catch(() => { })
       .finally(() => setLoadingPhotos(false));
@@ -844,10 +850,10 @@ export const Home: React.FC = () => {
             </div>
             <span className="text-xs font-black uppercase text-church-gold tracking-widest block">OFFERING"S (డేవుని కానుకలు)</span>
             <h2 className="text-3xl font-extrabold text-white tracking-tight font-display">
-               Offerings & Donations. 
+              Offerings & Donations.
             </h2>
             <p className="text-xs sm:text-sm text-slate-300 max-w-2xl mx-auto leading-relaxed">
-              "Each one must give as he has decided in his heart, not reluctantly or under compulsion, for God loves a cheerful giver." — 2 Corinthians 9:7.<br/><br/>   "సణుగుకొనకయు బలవంతముగా కాకయు ప్రతివాడును తన హృదయములో నిశ్చయించుకొనిన ప్రకారము ఇయ్యవలెను; దేవుడు ఉత్సాహముగా ఇచ్చువానిని ప్రేమించును"<br/><br/>Support our ministries and outreach initiatives of all Members .
+              "Each one must give as he has decided in his heart, not reluctantly or under compulsion, for God loves a cheerful giver." — 2 Corinthians 9:7.<br /><br />   "సణుగుకొనకయు బలవంతముగా కాకయు ప్రతివాడును తన హృదయములో నిశ్చయించుకొనిన ప్రకారము ఇయ్యవలెను; దేవుడు ఉత్సాహముగా ఇచ్చువానిని ప్రేమించును"<br /><br />Support our ministries and outreach initiatives of all Members .
             </p>
             <div className="pt-2">
               <button

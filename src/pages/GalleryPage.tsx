@@ -8,15 +8,23 @@ export const GalleryPage: React.FC = () => {
 
   useEffect(() => {
     api.get('/api/gallery/')
-      .then((res) => setPhotos(res.data))
-      .catch(() => {})
+      .then((res) => {
+        const data = Array.isArray(res.data)
+          ? res.data
+          : Array.isArray(res.data.results)
+            ? res.data.results
+            : [];
+
+        setPhotos(data);
+      })
+      .catch(() => { })
       .finally(() => setLoading(false));
   }, []);
 
   return (
     <div className="min-h-screen bg-light-bg dark:bg-dark-bg transition-colors duration-300 pt-28 pb-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
+
         {/* Header */}
         <div className="text-center mb-12">
           <span className="text-xs font-bold text-church-gold uppercase tracking-wider block mb-1">Gallery</span>
@@ -31,16 +39,16 @@ export const GalleryPage: React.FC = () => {
         ) : photos.length > 0 ? (
           <div className="columns-1 sm:columns-2 md:columns-3 lg:columns-4 gap-6 space-y-6">
             {photos.map((p) => (
-              <div 
-                key={p.id} 
+              <div
+                key={p.id}
                 className="break-inside-avoid rounded-3xl overflow-hidden border border-slate-200 dark:border-slate-800 bg-white dark:bg-dark-card shadow-sm hover:shadow-md transition-shadow relative group"
               >
-                <img 
-                  src={p.image} 
-                  alt={p.caption} 
+                <img
+                  src={p.image}
+                  alt={p.caption}
                   className="w-full h-auto object-cover max-h-[400px] hover:scale-101 transition-transform duration-300"
                 />
-                
+
                 {p.caption && (
                   <div className="p-4 border-t border-slate-100 dark:border-slate-900 bg-slate-50 dark:bg-slate-900/40">
                     <p className="text-xs font-bold text-slate-800 dark:text-white leading-relaxed">{p.caption}</p>
