@@ -10,19 +10,26 @@ export const LiveStreamPage: React.FC = () => {
   useEffect(() => {
     api.get('/api/live-streams/')
       .then((res) => {
-        const active = res.data.find((s: any) => s.is_active);
-        const archives = res.data.filter((s: any) => !s.is_active);
+        console.log("LIVE STREAM API RESPONSE:", res.data);
+
+        const streams = Array.isArray(res.data)
+          ? res.data
+          : res.data.results || res.data.live_streams || [];
+
+        const active = streams.find((s: any) => s.is_active);
+        const archives = streams.filter((s: any) => !s.is_active);
+
         setActiveStream(active || null);
         setArchiveStreams(archives);
       })
-      .catch(() => {})
+      .catch(() => { })
       .finally(() => setLoading(false));
   }, []);
 
   return (
     <div className="min-h-screen bg-light-bg dark:bg-dark-bg transition-colors duration-300 pt-28 pb-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
+
         {/* Header */}
         <div className="text-center mb-12">
           <span className="text-xs font-bold text-church-gold uppercase tracking-wider block mb-1">Broadcast</span>
@@ -36,14 +43,14 @@ export const LiveStreamPage: React.FC = () => {
           <div className="py-24 flex justify-center"><Loader className="w-10 h-10 animate-spin text-church-gold" /></div>
         ) : (
           <div className="space-y-16">
-            
+
             {/* Active Live Broadcaster */}
             <div className="max-w-4xl mx-auto">
               <h2 className="text-xl font-bold text-church-blue dark:text-white font-display mb-4 text-center">
                 {activeStream ? 'Join Current Live Stream' : 'Live Service Status'}
               </h2>
-              
-              <div className="w-full aspect-video rounded-3xl overflow-hidden shadow-2xl border border-slate-205 dark:border-slate-800/80 bg-slate-900">
+
+              <div className="w-full aspect-video rounded-3xl overflow-hidden shadow-2xl border border-slate-200 dark:border-slate-800/80 bg-slate-900">
                 {activeStream && activeStream.youtube_id ? (
                   <iframe
                     width="100%"
@@ -71,11 +78,11 @@ export const LiveStreamPage: React.FC = () => {
               <h2 className="text-2xl font-bold text-church-blue dark:text-white font-display mb-6 border-b border-slate-200 dark:border-slate-800 pb-3">
                 Archived Ceremonies & Services
               </h2>
-              
+
               {archiveStreams.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                   {archiveStreams.map((s) => (
-                    <div 
+                    <div
                       key={s.id}
                       className="rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-dark-card overflow-hidden shadow-sm hover:shadow-md transition-shadow"
                     >
