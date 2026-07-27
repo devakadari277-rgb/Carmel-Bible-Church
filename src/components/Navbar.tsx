@@ -171,8 +171,8 @@ export const Navbar: React.FC = () => {
     <>
       <nav
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${isScrolled
-            ? 'bg-church-blue/85 border-b border-church-gold/25 py-2.5 shadow-none'
-            : 'bg-church-blue/40 border-b border-white/5 py-4'
+          ? 'bg-church-blue/85 border-b border-church-gold/25 py-2.5 shadow-none'
+          : 'bg-church-blue/40 border-b border-white/5 py-4'
           }`}
       >
         <div className="max-w-[95%] xl:max-w-7xl mx-auto px-4 sm:px-6 relative">
@@ -248,8 +248,8 @@ export const Navbar: React.FC = () => {
                             <div
                               key={n.id}
                               className={`p-3 rounded-xl border text-[11px] leading-relaxed transition-all cursor-pointer ${n.is_read
-                                  ? 'bg-slate-900/30 border-slate-900/40 text-slate-400'
-                                  : 'bg-slate-900/90 border-slate-800/80 text-white font-medium hover:border-church-gold/30'
+                                ? 'bg-slate-900/30 border-slate-900/40 text-slate-400'
+                                : 'bg-slate-900/90 border-slate-800/80 text-white font-medium hover:border-church-gold/30'
                                 }`}
                               onClick={() => handleMarkSingleRead(n.id, n.title)}
                             >
@@ -352,8 +352,8 @@ export const Navbar: React.FC = () => {
                 to={link.path}
                 onClick={() => setIsOpen(false)}
                 className={`relative flex items-center px-4 py-3.5 rounded-xl text-xs font-bold tracking-wider uppercase transition-all duration-300 group border border-transparent ${isActive
-                    ? 'text-church-gold bg-church-gold/10 font-extrabold shadow-[inset_0_0_12px_rgba(212,175,55,0.05)] border-l-2 border-church-gold'
-                    : 'text-slate-300 hover:text-church-gold hover:bg-white/5 hover:translate-x-1.5'
+                  ? 'text-church-gold bg-church-gold/10 font-extrabold shadow-[inset_0_0_12px_rgba(212,175,55,0.05)] border-l-2 border-church-gold'
+                  : 'text-slate-300 hover:text-church-gold hover:bg-white/5 hover:translate-x-1.5'
                   }`}
               >
                 <span>{link.label}</span>
