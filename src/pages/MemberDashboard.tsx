@@ -42,16 +42,34 @@ export const MemberDashboard: React.FC = () => {
       setLoadingOverview(true);
       // Fetch user's prayer requests
       api.get('/api/prayers/my_requests/')
-        .then((res) => setMyPrayers(res.data))
-        .catch(() => {});
+        .then((res) => {
+          const data = Array.isArray(res.data)
+            ? res.data
+            : Array.isArray(res.data?.results)
+              ? res.data.results
+              : [];
+          setMyPrayers(data);
+        })
+        .catch((err) => {
+          console.error('Fetch My Prayers Error:', err);
+          setMyPrayers([]);
+        });
       
       // Fetch upcoming events
       api.get('/api/events/')
         .then((res) => {
-          const future = res.data.filter((e: any) => new Date(e.event_date) > new Date());
+          const data = Array.isArray(res.data)
+            ? res.data
+            : Array.isArray(res.data?.results)
+              ? res.data.results
+              : [];
+          const future = data.filter((e: any) => new Date(e.event_date) > new Date());
           setEvents(future.slice(0, 4));
         })
-        .catch(() => {})
+        .catch((err) => {
+          console.error('Fetch Events Error:', err);
+          setEvents([]);
+        })
         .finally(() => setLoadingOverview(false));
     }
   }, [user]);

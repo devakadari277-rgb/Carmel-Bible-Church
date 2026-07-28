@@ -170,15 +170,21 @@ export const AdminDashboard: React.FC = () => {
 
     api.get(endpoints[activeTab])
       .then((res) => {
-        if (activeTab === 'members') setMembers(res.data);
-        else if (activeTab === 'events') setEvents(res.data);
-        else if (activeTab === 'prayers') setPrayers(res.data);
-        else if (activeTab === 'streams') setStreams(res.data);
-        else if (activeTab === 'announcements') setAnnouncements(res.data);
-        else if (activeTab === 'gallery') setPhotos(res.data);
-        else if (activeTab === 'messages') setMessagesList(res.data);
+        const data = Array.isArray(res.data)
+          ? res.data
+          : Array.isArray(res.data?.results)
+            ? res.data.results
+            : [];
+
+        if (activeTab === 'members') setMembers(data);
+        else if (activeTab === 'events') setEvents(data);
+        else if (activeTab === 'prayers') setPrayers(data);
+        else if (activeTab === 'streams') setStreams(data);
+        else if (activeTab === 'announcements') setAnnouncements(data);
+        else if (activeTab === 'gallery') setPhotos(data);
+        else if (activeTab === 'messages') setMessagesList(data);
         else if (activeTab === 'settings') {
-          const d = res.data;
+          const d = res.data || {};
           setChurchName(d.church_name || '');
           setHeroTitle(d.hero_title || '');
           setHeroSubtitle(d.hero_subtitle || '');

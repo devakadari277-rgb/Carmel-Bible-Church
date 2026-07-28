@@ -9,9 +9,16 @@ export const AnnouncementsPage: React.FC = () => {
   useEffect(() => {
     api.get('/api/announcements/')
       .then((res) => {
-        const data = Array.isArray(res.data) ? res.data : res.data.results || [];
+        const data = Array.isArray(res.data)
+          ? res.data
+          : Array.isArray(res.data?.results)
+            ? res.data.results
+            : [];
         setAnnouncements(data);
-      }).catch(() => { })
+      }).catch((err) => {
+        console.error('Fetch Announcements Error:', err);
+        setAnnouncements([]);
+      })
       .finally(() => setLoading(false));
   }, []);
 

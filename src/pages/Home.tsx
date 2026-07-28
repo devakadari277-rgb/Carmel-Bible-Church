@@ -195,40 +195,98 @@ export const Home: React.FC = () => {
 
   // Fetch Homepage Content
   useEffect(() => {
-    api.get('/api/settings/').then((res) => setSettings(res.data)).catch(() => { });
+    api.get('/api/settings/')
+      .then((res) => {
+        setSettings(res.data || {});
+      })
+      .catch((err) => {
+        console.error('Settings API Error:', err);
+      });
 
-    api.get('/api/events/').then((res) => {
-      const future = res.data.filter((e: any) => new Date(e.event_date) > new Date());
-      setEvents(future.slice(0, 3));
-    }).catch(() => { });
+    api.get('/api/events/')
+      .then((res) => {
+        const data = Array.isArray(res.data)
+          ? res.data
+          : Array.isArray(res.data?.results)
+            ? res.data.results
+            : [];
 
-    api.get('/api/prayers/').then((res) => {
-      setPrayers(res.data.slice(0, 4));
-    }).catch(() => { });
+        const future = data.filter(
+          (e: any) => new Date(e.event_date) > new Date()
+        );
 
-    api.get('/api/announcements/').then((res) => {
-      setAnnouncements(res.data.slice(0, 3));
-    }).catch(() => { });
+        setEvents(future.slice(0, 3));
+      })
+      .catch((err) => {
+        console.error('Events API Error:', err);
+        setEvents([]);
+      });
+
+    api.get('/api/prayers/')
+      .then((res) => {
+        const data = Array.isArray(res.data)
+          ? res.data
+          : Array.isArray(res.data?.results)
+            ? res.data.results
+            : [];
+
+        setPrayers(data.slice(0, 4));
+      })
+      .catch((err) => {
+        console.error('Prayers API Error:', err);
+        setPrayers([]);
+      });
+
+    api.get('/api/announcements/')
+      .then((res) => {
+        const data = Array.isArray(res.data)
+          ? res.data
+          : Array.isArray(res.data?.results)
+            ? res.data.results
+            : [];
+
+        setAnnouncements(data.slice(0, 3));
+      })
+      .catch((err) => {
+        console.error('Announcements API Error:', err);
+        setAnnouncements([]);
+      });
 
     api.get('/api/live-streams/')
       .then((res) => {
-        setSermons(res.data.slice(0, 3));
+        const data = Array.isArray(res.data)
+          ? res.data
+          : Array.isArray(res.data?.results)
+            ? res.data.results
+            : [];
+
+        setSermons(data.slice(0, 3));
       })
-      .catch(() => { })
-      .finally(() => setLoadingSermons(false));
+      .catch((err) => {
+        console.error('Live Streams API Error:', err);
+        setSermons([]);
+      })
+      .finally(() => {
+        setLoadingSermons(false);
+      });
 
     api.get('/api/gallery/')
       .then((res) => {
         const data = Array.isArray(res.data)
           ? res.data
-          : Array.isArray(res.data.results)
+          : Array.isArray(res.data?.results)
             ? res.data.results
             : [];
 
         setPhotos(data.slice(0, 6));
       })
-      .catch(() => { })
-      .finally(() => setLoadingPhotos(false));
+      .catch((err) => {
+        console.error('Gallery API Error:', err);
+        setPhotos([]);
+      })
+      .finally(() => {
+        setLoadingPhotos(false);
+      });
 
     // Request browser notification permissions on mount
     if ('Notification' in window && Notification.permission === 'default') {

@@ -23,15 +23,24 @@ export const PrayersPage: React.FC = () => {
     setLoading(true);
     api.get('/api/prayers/')
       .then((res) => {
+        const data = Array.isArray(res.data)
+          ? res.data
+          : Array.isArray(res.data?.results)
+            ? res.data.results
+            : [];
+
         // Sort pinned first
-        const sorted = res.data.sort((a: any, b: any) => {
+        const sorted = data.sort((a: any, b: any) => {
           if (a.is_pinned && !b.is_pinned) return -1;
           if (!a.is_pinned && b.is_pinned) return 1;
           return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
         });
         setPrayers(sorted);
       })
-      .catch(() => { })
+      .catch((err) => {
+        console.error('Fetch Prayers Error:', err);
+        setPrayers([]);
+      })
       .finally(() => setLoading(false));
   };
 
