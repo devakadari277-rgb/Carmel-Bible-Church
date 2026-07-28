@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import churchLogoImg from '../assets/church_logo.png';
 
 export const LoadingSpinner: React.FC<{ size?: 'sm' | 'md' | 'lg'; color?: string }> = ({ 
   size = 'md', 
@@ -28,7 +29,7 @@ export const PageLoader: React.FC = () => {
         className="flex flex-col items-center mb-6"
       >
         <img 
-          src="/church_logo.png" 
+          src={churchLogoImg} 
           alt="Carmel Bible Church Logo" 
           className="w-20 h-20 object-contain mb-4 filter drop-shadow-2xl" 
         />

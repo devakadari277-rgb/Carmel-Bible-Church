@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Phone, Mail, MapPin } from 'lucide-react';
 import api from '../utils/api';
+import churchLogoImg from '../assets/church_logo.png';
 
 export const Footer: React.FC = () => {
   const [settings, setSettings] = useState<any>({
@@ -33,7 +34,7 @@ export const Footer: React.FC = () => {
           <div>
             <div className="flex items-center gap-3 mb-4">
               <img 
-                src="/church_logo.png" 
+                src={churchLogoImg} 
                 alt="Carmel Bible Church Logo" 
                 className="h-10 w-10 object-cover rounded-full border border-church-gold/30" 
               />
