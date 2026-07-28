@@ -1,5 +1,6 @@
 import axios from 'axios';
 
+// Trigger Vercel auto-rebuild to inject VITE_API_URL
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || '', // Support environment-configured backend URL in production
   headers: {
