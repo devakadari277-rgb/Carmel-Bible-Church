@@ -527,11 +527,11 @@ export const Home: React.FC = () => {
             <div className="shrink-0 flex flex-col items-center gap-4 text-center">
               <div className="w-48 h-48 rounded-full overflow-hidden border-4 border-church-gold shadow-lg relative group">
                 <img
-                  src={settings.pastor_photo ? `${settings.pastor_photo}?t=${cacheBuster}` : `/pastor_photo.png?t=${cacheBuster}`}
+                  src={`/pastor_photo.png?t=${cacheBuster}`}
                   alt={settings.pastor_name || 'Shyam Chevuri'}
                   className="w-full h-full object-cover transition-all duration-500 group-hover:scale-105"
                   onError={(e) => {
-                    (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=300&auto=format&fit=crop&q=60';
+                    (e.target as HTMLImageElement).src = '/pastor_photo.png';
                   }}
                 />
               </div>
@@ -627,11 +627,11 @@ export const Home: React.FC = () => {
                 <div className="flex flex-col sm:flex-row gap-5 items-center">
                   <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-church-gold shadow-md shrink-0">
                     <img
-                      src={settings.pastor_photo ? `${settings.pastor_photo}?t=${cacheBuster}` : `/pastor_photo.png?t=${cacheBuster}`}
+                      src={`/pastor_photo.png?t=${cacheBuster}`}
                       alt="Pastor Shyam Chevuri"
                       className="w-full h-full object-cover"
                       onError={(e) => {
-                        (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=300&auto=format&fit=crop&q=60';
+                        (e.target as HTMLImageElement).src = '/pastor_photo.png';
                       }}
                     />
                   </div>

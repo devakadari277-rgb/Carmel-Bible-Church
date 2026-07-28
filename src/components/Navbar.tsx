@@ -193,7 +193,7 @@ export const Navbar: React.FC = () => {
             <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center shrink-0">
               <Link to="/" className="flex items-center gap-3 sm:gap-3.5 group">
                 <img
-                  src={settings.church_logo || "/church_logo.png"}
+                  src="/church_logo.png"
                   alt="Carmel Bible Church Logo"
                   className="h-14 w-14 sm:h-18 sm:w-18 object-cover rounded-full border-2 border-church-gold/40 shadow-none transition-transform duration-300 group-hover:scale-105"
                 />
@@ -322,7 +322,7 @@ export const Navbar: React.FC = () => {
         <div className="flex items-center justify-between p-5 border-b border-church-gold/15">
           <Link to="/" onClick={() => setIsOpen(false)} className="flex items-center gap-2.5 group shrink-0">
             <img
-              src={settings.church_logo || "/church_logo.png"}
+              src="/church_logo.png"
               alt="Logo"
               className="h-11 w-11 object-cover rounded-full border border-church-gold/30 transition-transform duration-300 group-hover:scale-105"
             />

@@ -33,7 +33,7 @@ export const Footer: React.FC = () => {
           <div>
             <div className="flex items-center gap-3 mb-4">
               <img 
-                src={settings.church_logo || "/church_logo.png"} 
+                src="/church_logo.png" 
                 alt="Carmel Bible Church Logo" 
                 className="h-10 w-10 object-cover rounded-full border border-church-gold/30" 
               />
