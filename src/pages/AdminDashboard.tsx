@@ -128,6 +128,9 @@ export const AdminDashboard: React.FC = () => {
   const [fbUrl, setFbUrl] = useState('');
   const [ytUrl, setYtUrl] = useState('');
   const [igUrl, setIgUrl] = useState('');
+  // Photo file upload states for Settings
+  const [churchLogoFile, setChurchLogoFile] = useState<File | null>(null);
+  const [pastorPhotoFile, setPastorPhotoFile] = useState<File | null>(null);
 
   // Fetch stats on load
   const fetchOverviewStats = async () => {
@@ -466,36 +469,44 @@ export const AdminDashboard: React.FC = () => {
   // Website customizer settings PUT (Singleton)
   const handleSettingsSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const payload = {
-      church_name: churchName,
-      hero_title: heroTitle,
-      hero_subtitle: heroSubtitle,
-      hero_subtitle_telugu: heroSubtitleTelugu,
-      welcome_message: welcomeMsg,
-      vision,
-      vision_telugu: visionTelugu,
-      mission,
-      mission_telugu: missionTelugu,
-      pastor_name: pastorName,
-      pastor_designation: pastorDesg,
-      pastor_bio: pastorBio,
-      pastor_welcome_message: pastorWelcome,
-      pastor_ministry_info: pastorMinistry,
-      contact_phone: phone,
-      contact_email: emailSetting,
-      contact_address: address,
-      map_embed_url: mapUrl,
-      facebook_url: fbUrl,
-      youtube_url: ytUrl,
-      instagram_url: igUrl
-    };
+    const formData = new FormData();
+    formData.append('church_name', churchName);
+    formData.append('hero_title', heroTitle);
+    formData.append('hero_subtitle', heroSubtitle);
+    formData.append('hero_subtitle_telugu', heroSubtitleTelugu);
+    formData.append('welcome_message', welcomeMsg);
+    formData.append('vision', vision);
+    formData.append('vision_telugu', visionTelugu);
+    formData.append('mission', mission);
+    formData.append('mission_telugu', missionTelugu);
+    formData.append('pastor_name', pastorName);
+    formData.append('pastor_designation', pastorDesg);
+    formData.append('pastor_bio', pastorBio);
+    formData.append('pastor_welcome_message', pastorWelcome);
+    formData.append('pastor_ministry_info', pastorMinistry);
+    formData.append('contact_phone', phone);
+    formData.append('contact_email', emailSetting);
+    formData.append('contact_address', address);
+    formData.append('map_embed_url', mapUrl);
+    formData.append('facebook_url', fbUrl);
+    formData.append('youtube_url', ytUrl);
+    formData.append('instagram_url', igUrl);
+    if (churchLogoFile) formData.append('church_logo', churchLogoFile);
+    if (pastorPhotoFile) formData.append('pastor_photo', pastorPhotoFile);
 
     try {
-      // Patch to id 1 setting singleton
-      await api.patch('/api/settings/1/', payload);
-      addToast('Church custom settings updated successfully!', 'success');
+      await api.patch('/api/settings/1/', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      addToast('Church settings updated successfully!', 'success');
+      setChurchLogoFile(null);
+      setPastorPhotoFile(null);
+      const logoInput = document.getElementById('churchLogoInput') as HTMLInputElement;
+      const photoInput = document.getElementById('pastorPhotoInput') as HTMLInputElement;
+      if (logoInput) logoInput.value = '';
+      if (photoInput) photoInput.value = '';
     } catch {
-      addToast('Failed to save website customization settings.', 'error');
+      addToast('Failed to save website settings.', 'error');
     }
   };
 
@@ -1476,6 +1487,41 @@ export const AdminDashboard: React.FC = () => {
                   onChange={(e) => setPastorMinistry(e.target.value)}
                   className="block w-full px-4 py-3 border border-slate-800 rounded-2xl bg-slate-900 text-white text-sm focus:outline-none focus:ring-2 focus:ring-church-gold transition-all"
                 />
+              </div>
+
+              {/* Pastor Photo Upload */}
+              <div className="p-4 rounded-2xl border border-church-gold/20 bg-church-gold/5">
+                <label className="block text-xs font-bold uppercase tracking-wider text-church-gold mb-2">📷 Pastor Photo Upload</label>
+                <p className="text-[10px] text-slate-400 mb-3">Upload pastor gari actual photo — website లో కనిపిస్తుంది</p>
+                <input
+                  type="file"
+                  id="pastorPhotoInput"
+                  accept="image/*"
+                  onChange={(e) => setPastorPhotoFile(e.target.files ? e.target.files[0] : null)}
+                  className="block w-full px-3 py-3 border border-slate-700 rounded-xl bg-slate-900 text-xs text-slate-300 focus:outline-none transition-all"
+                />
+                {pastorPhotoFile && (
+                  <p className="text-[10px] text-emerald-400 mt-1.5">✅ Selected: {pastorPhotoFile.name}</p>
+                )}
+              </div>
+            </div>
+
+            {/* Church Logo Upload Section */}
+            <div className="p-6 sm:p-8 rounded-3xl bg-slate-950/65 border border-slate-800 shadow-md space-y-4">
+              <h3 className="text-lg font-bold text-church-gold font-display border-b border-slate-800 pb-2.5">Church Logo Upload</h3>
+              <div className="p-4 rounded-2xl border border-church-gold/20 bg-church-gold/5">
+                <label className="block text-xs font-bold uppercase tracking-wider text-church-gold mb-2">🖼️ Church Logo Upload</label>
+                <p className="text-[10px] text-slate-400 mb-3">Upload church logo — Navbar లో కనిపిస్తుంది</p>
+                <input
+                  type="file"
+                  id="churchLogoInput"
+                  accept="image/*"
+                  onChange={(e) => setChurchLogoFile(e.target.files ? e.target.files[0] : null)}
+                  className="block w-full px-3 py-3 border border-slate-700 rounded-xl bg-slate-900 text-xs text-slate-300 focus:outline-none transition-all"
+                />
+                {churchLogoFile && (
+                  <p className="text-[10px] text-emerald-400 mt-1.5">✅ Selected: {churchLogoFile.name}</p>
+                )}
               </div>
             </div>
 

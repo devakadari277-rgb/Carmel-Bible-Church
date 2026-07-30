@@ -8,7 +8,7 @@ import {
   Compass, Send, Flame, Users, Phone, Mail, User, Pin,
   Play, BookOpen, Gift, Quote, X, Award
 } from 'lucide-react';
-import pastorPhotoImg from '../assets/pastor_photo.png';
+import pastorPhotoFallback from '../assets/pastor_photo.png';
 
 // Hardcoded Ministries Info
 const MINISTRIES = [
@@ -162,7 +162,7 @@ const CountdownTimer: React.FC<{
 export const Home: React.FC = () => {
   const navigate = useNavigate();
   const { addToast } = useToast();
-  const cacheBuster = React.useMemo(() => Date.now(), []);
+
 
   // Page States
   const [settings, setSettings] = useState<any>({});
@@ -528,11 +528,11 @@ export const Home: React.FC = () => {
             <div className="shrink-0 flex flex-col items-center gap-4 text-center">
               <div className="w-48 h-48 rounded-full overflow-hidden border-4 border-church-gold shadow-lg relative group">
                 <img
-                  src={pastorPhotoImg}
+                  src={pastorPhotoFallback}
                   alt={settings.pastor_name || 'Shyam Chevuri'}
                   className="w-full h-full object-cover transition-all duration-500 group-hover:scale-105"
                   onError={(e) => {
-                    (e.target as HTMLImageElement).src = pastorPhotoImg;
+                    (e.target as HTMLImageElement).src = pastorPhotoFallback;
                   }}
                 />
               </div>
@@ -628,11 +628,11 @@ export const Home: React.FC = () => {
                 <div className="flex flex-col sm:flex-row gap-5 items-center">
                   <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-church-gold shadow-md shrink-0">
                     <img
-                      src={pastorPhotoImg}
+                      src={pastorPhotoFallback}
                       alt="Pastor Shyam Chevuri"
                       className="w-full h-full object-cover"
                       onError={(e) => {
-                        (e.target as HTMLImageElement).src = pastorPhotoImg;
+                        (e.target as HTMLImageElement).src = pastorPhotoFallback;
                       }}
                     />
                   </div>
