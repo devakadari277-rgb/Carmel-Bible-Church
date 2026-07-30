@@ -14,7 +14,6 @@ export const Navbar: React.FC = () => {
 
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [settings, setSettings] = useState<any>({});
 
   const [notifications, setNotifications] = useState<any[]>([]);
   const [showNotifications, setShowNotifications] = useState(false);
@@ -108,15 +107,6 @@ export const Navbar: React.FC = () => {
       .catch(() => { });
   };
 
-  useEffect(() => {
-    api.get('/api/settings/')
-      .then((res) => {
-        if (res.data) {
-          setSettings(res.data);
-        }
-      })
-      .catch(() => { });
-  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
