@@ -1,4 +1,0 @@
-User-agent: *
-Allow: /
-
-Sitemap: https://carmel-bible-church.vercel.app/sitemap.xml
