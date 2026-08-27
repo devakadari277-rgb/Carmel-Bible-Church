@@ -1271,22 +1271,16 @@ export const Home: React.FC = () => {
       {/* 15. GOOGLE MAPS LOCATION */}
       <section className="py-12 relative z-10 px-4">
         <div className="max-w-7xl mx-auto rounded-3xl overflow-hidden border border-church-gold/15 shadow-2xl h-96 relative">
-          {settings.map_embed_url ? (
-            <iframe
-              title="Church Location Map"
-              src={settings.map_embed_url}
-              width="100%"
-              height="100%"
-              style={{ border: 0 }}
-              allowFullScreen
-              loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
-            ></iframe>
-          ) : (
-            <div className="w-full h-full bg-slate-900 flex items-center justify-center text-slate-500 font-bold uppercase text-xs">
-              Map View Currently Unavailable
-            </div>
-          )}
+          <iframe
+            title="Church Location Map"
+            src={settings.map_embed_url || "https://www.google.com/maps?q=Carmel+Bible+Church,+Dolapeta,+Rajam,+Andhra+Pradesh+532127&output=embed"}
+            width="100%"
+            height="100%"
+            style={{ border: 0 }}
+            allowFullScreen
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+          ></iframe>
         </div>
       </section>
 
