@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../components/Toast';
-import api from '../utils/api';
+import api, { getMediaUrl } from '../utils/api';
 import {
   Users, Calendar, HeartHandshake, Video, Megaphone,
   Image as ImageIcon, Settings, Mail, ClipboardList,
@@ -105,6 +105,7 @@ export const AdminDashboard: React.FC = () => {
   // 4. Gallery Form
   const [photoCaption, setPhotoCaption] = useState('');
   const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
 
   // 5. Website Setting Form (Singleton)
   const [churchName, setChurchName] = useState('');
@@ -428,30 +429,37 @@ export const AdminDashboard: React.FC = () => {
   // Gallery CRUD
   const handleGallerySubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!photoFile && !editMode) {
+    if (!photoFile) {
       addToast('Please select a photo file to upload.', 'warning');
       return;
     }
 
+    setIsUploadingPhoto(true);
     const formData = new FormData();
-    formData.append('caption', photoCaption);
-    if (photoFile) {
-      formData.append('image', photoFile);
+    if (photoCaption.trim()) {
+      formData.append('caption', photoCaption.trim());
+    } else {
+      formData.append('caption', '');
     }
+    formData.append('image', photoFile);
 
     try {
       const res = await api.post('/api/gallery/', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       setPhotos([res.data, ...photos]);
-      addToast('Image uploaded to gallery.', 'success');
+      addToast('Image uploaded to gallery successfully!', 'success');
       setPhotoCaption('');
       setPhotoFile(null);
       // Reset input element
       const fileInput = document.getElementById('photoFileInput') as HTMLInputElement;
       if (fileInput) fileInput.value = '';
-    } catch {
-      addToast('Failed to upload image.', 'error');
+    } catch (err: any) {
+      console.error('Gallery upload error:', err);
+      const errMsg = err?.response?.data?.image?.[0] || err?.response?.data?.detail || 'Failed to upload image. Please try again.';
+      addToast(errMsg, 'error');
+    } finally {
+      setIsUploadingPhoto(false);
     }
   };
 
@@ -1271,33 +1279,58 @@ export const AdminDashboard: React.FC = () => {
                 
                 <form onSubmit={handleGallerySubmit} className="space-y-4">
                   <div>
-                    <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Image Caption</label>
+                    <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">
+                      Image Caption <span className="text-slate-500 text-[11px] font-normal lowercase">(optional)</span>
+                    </label>
                     <input
                       type="text"
-                      required
                       value={photoCaption}
                       onChange={(e) => setPhotoCaption(e.target.value)}
-                      placeholder="Youth Gathering 2026"
+                      placeholder="e.g. Youth Gathering 2026 (Optional)"
                       className="block w-full px-4 py-3 border border-slate-800 rounded-2xl bg-slate-900 text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-church-gold focus:border-transparent text-sm transition-all"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Select Image File</label>
+                    <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">
+                      Select Image File <span className="text-rose-400">*</span>
+                    </label>
                     <input
                       type="file"
                       id="photoFileInput"
                       required
                       accept="image/*"
                       onChange={(e) => setPhotoFile(e.target.files ? e.target.files[0] : null)}
-                      className="block w-full px-3 py-3 border border-slate-800 rounded-2xl bg-slate-900 text-xs focus:outline-none transition-all"
+                      className="block w-full px-3 py-3 border border-slate-800 rounded-2xl bg-slate-900 text-xs focus:outline-none transition-all text-slate-300 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-church-gold/20 file:text-church-gold hover:file:bg-church-gold/30 cursor-pointer"
                     />
                   </div>
 
+                  {photoFile && (
+                    <div className="p-3 bg-slate-900/60 rounded-2xl border border-church-gold/30 flex items-center gap-3">
+                      <img
+                        src={URL.createObjectURL(photoFile)}
+                        alt="Preview"
+                        className="w-14 h-14 object-cover rounded-xl border border-slate-700 shadow-sm"
+                      />
+                      <div className="text-xs text-slate-300 min-w-0">
+                        <p className="font-semibold truncate">{photoFile.name}</p>
+                        <p className="text-[10px] text-slate-400">{(photoFile.size / 1024).toFixed(1)} KB - Ready to upload</p>
+                      </div>
+                    </div>
+                  )}
+
                   <button
                     type="submit"
-                    className="w-full py-3 bg-church-gold hover:bg-church-gold-hover text-church-blue text-xs font-bold rounded-2xl transition-all shadow-md"
+                    disabled={isUploadingPhoto}
+                    className="w-full py-3 bg-church-gold hover:bg-church-gold-hover disabled:opacity-50 text-church-blue text-xs font-bold rounded-2xl transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer"
                   >
-                    Upload Image
+                    {isUploadingPhoto ? (
+                      <>
+                        <Loader className="w-4 h-4 animate-spin" />
+                        <span>Uploading Image...</span>
+                      </>
+                    ) : (
+                      <span>Upload Image</span>
+                    )}
                   </button>
                 </form>
               </div>
@@ -1308,21 +1341,33 @@ export const AdminDashboard: React.FC = () => {
                 <h3 className="text-lg font-bold font-display mb-4">Gallery Inventory</h3>
                 {photos.length > 0 ? (
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 max-h-[450px] overflow-y-auto pr-1">
-                    {photos.map((p) => (
-                      <div key={p.id} className="relative group rounded-2xl overflow-hidden border border-slate-800 bg-slate-900 aspect-square">
-                        <img src={p.image} alt={p.caption} className="w-full h-full object-cover" />
-                        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-between p-3">
-                          <span className="text-[10px] font-semibold text-white leading-relaxed line-clamp-2">{p.caption}</span>
-                          <button
-                            onClick={() => handleDeletePhoto(p.id)}
-                            className="self-end p-2 bg-rose-500 text-white rounded-xl hover:bg-rose-600 transition-colors"
-                            title="Delete image"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
+                    {photos.map((p) => {
+                      const imgUrl = getMediaUrl(p.image);
+                      return (
+                        <div key={p.id} className="relative group rounded-2xl overflow-hidden border border-slate-800 bg-slate-900 aspect-square">
+                          <img
+                            src={imgUrl || '/church_sanctuary_bg2.png'}
+                            alt={p.caption || 'Gallery photo'}
+                            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = '/church_sanctuary_bg2.png';
+                            }}
+                          />
+                          <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-between p-3">
+                            <span className="text-[10px] font-semibold text-white leading-relaxed line-clamp-2">
+                              {p.caption || 'No caption'}
+                            </span>
+                            <button
+                              onClick={() => handleDeletePhoto(p.id)}
+                              className="self-end p-2 bg-rose-500 text-white rounded-xl hover:bg-rose-600 transition-colors cursor-pointer"
+                              title="Delete image"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 ) : (
                   <p className="text-xs text-slate-500 py-6 text-center">No images uploaded.</p>

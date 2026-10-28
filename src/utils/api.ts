@@ -8,6 +8,25 @@ const api = axios.create({
   },
 });
 
+/**
+ * Helper to ensure media file URLs (gallery images, pastor photo, church logo)
+ * correctly resolve to full absolute URLs whether served from Cloudinary, backend, or local dev.
+ */
+export const getMediaUrl = (url: string | null | undefined): string => {
+  if (!url) return '';
+  if (
+    url.startsWith('http://') ||
+    url.startsWith('https://') ||
+    url.startsWith('blob:') ||
+    url.startsWith('data:')
+  ) {
+    return url;
+  }
+  const backendBase = (import.meta.env.VITE_API_URL || '').replace(/\/+$/, '');
+  const cleanPath = url.startsWith('/') ? url : `/${url}`;
+  return backendBase ? `${backendBase}${cleanPath}` : cleanPath;
+};
+
 // Interceptor to automatically add JWT access token to headers
 api.interceptors.request.use(
   (config) => {

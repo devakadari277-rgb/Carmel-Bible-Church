@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '../components/Toast';
-import api from '../utils/api';
+import api, { getMediaUrl } from '../utils/api';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Calendar, MapPin, Clock, Video, HeartHandshake,
@@ -1036,23 +1036,29 @@ export const Home: React.FC = () => {
                 <div key={n} className="h-64 rounded-3xl bg-slate-900/40 border border-church-gold/10 animate-pulse"></div>
               ))
             ) : photos.length > 0 ? (
-              photos.map((pic) => (
-                <div
-                  key={pic.id}
-                  className="group relative h-64 rounded-3xl overflow-hidden border border-church-gold/10 shadow-lg hover:border-church-gold/30 transition-all duration-350 cursor-pointer"
-                  onClick={() => navigate('/gallery')}
-                >
-                  <img
-                    src={pic.image}
-                    alt={pic.caption || "Church Gallery"}
-                    className="w-full h-full object-cover transition-all duration-500 group-hover:scale-105 filter brightness-75 group-hover:brightness-[0.85]"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent p-6 flex flex-col justify-end">
-                    <h4 className="text-white font-bold font-display text-base tracking-wide">{pic.caption || "Carmel Bible Church"}</h4>
-                    <span className="text-[10px] text-slate-400 font-mono block mt-1">Uploaded: {new Date(pic.uploaded_at).toLocaleDateString()}</span>
+              photos.map((pic) => {
+                const imgUrl = getMediaUrl(pic.image);
+                return (
+                  <div
+                    key={pic.id}
+                    className="group relative h-64 rounded-3xl overflow-hidden border border-church-gold/10 shadow-lg hover:border-church-gold/30 transition-all duration-350 cursor-pointer"
+                    onClick={() => navigate('/gallery')}
+                  >
+                    <img
+                      src={imgUrl || '/church_sanctuary_bg2.png'}
+                      alt={pic.caption || "Carmel Bible Church"}
+                      className="w-full h-full object-cover transition-all duration-500 group-hover:scale-105 filter brightness-75 group-hover:brightness-[0.85]"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = '/church_sanctuary_bg2.png';
+                      }}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent p-6 flex flex-col justify-end">
+                      <h4 className="text-white font-bold font-display text-base tracking-wide">{pic.caption || "Carmel Bible Church"}</h4>
+                      <span className="text-[10px] text-slate-400 font-mono block mt-1">Uploaded: {new Date(pic.uploaded_at).toLocaleDateString()}</span>
+                    </div>
                   </div>
-                </div>
-              ))
+                );
+              })
             ) : (
               <div className="col-span-3 text-center py-12 text-slate-400 text-sm">
                 No photo memories uploaded yet. Check back later!
