@@ -20,17 +20,25 @@ export const getMediaUrl = (url: string | null | undefined): string => {
     url.startsWith('blob:') ||
     url.startsWith('data:')
   ) {
-    // If the browser page is HTTPS and the image is HTTP, upgrade to HTTPS to avoid mixed content blocking
-    if (url.startsWith('http://') && typeof window !== 'undefined' && window.location.protocol === 'https:') {
-      return url.replace('http://', 'https://');
+    let cleanUrl = url;
+    // Upgrade http to https if window is https
+    if (cleanUrl.startsWith('http://') && typeof window !== 'undefined' && window.location.protocol === 'https:') {
+      cleanUrl = cleanUrl.replace('http://', 'https://');
     }
-    return url;
+    // Ensure Cloudinary URLs include /image/upload/
+    if (cleanUrl.includes('res.cloudinary.com') && !cleanUrl.includes('/image/upload/') && !cleanUrl.includes('/raw/upload/') && !cleanUrl.includes('/video/upload/')) {
+      cleanUrl = cleanUrl.replace(/res\.cloudinary\.com\/([^/]+)\/(.+)/, 'res.cloudinary.com/$1/image/upload/$2');
+    }
+    return cleanUrl;
   }
   const backendBase = (import.meta.env.VITE_API_URL || '').replace(/\/+$/, '');
   const cleanPath = url.startsWith('/') ? url : `/${url}`;
-  const fullUrl = backendBase ? `${backendBase}${cleanPath}` : cleanPath;
+  let fullUrl = backendBase ? `${backendBase}${cleanPath}` : cleanPath;
   if (fullUrl.startsWith('http://') && typeof window !== 'undefined' && window.location.protocol === 'https:') {
-    return fullUrl.replace('http://', 'https://');
+    fullUrl = fullUrl.replace('http://', 'https://');
+  }
+  if (fullUrl.includes('res.cloudinary.com') && !fullUrl.includes('/image/upload/') && !fullUrl.includes('/raw/upload/') && !fullUrl.includes('/video/upload/')) {
+    fullUrl = fullUrl.replace(/res\.cloudinary\.com\/([^/]+)\/(.+)/, 'res.cloudinary.com/$1/image/upload/$2');
   }
   return fullUrl;
 };
