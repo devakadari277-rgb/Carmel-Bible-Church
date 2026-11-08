@@ -104,8 +104,9 @@ export const AdminDashboard: React.FC = () => {
 
   // 4. Gallery Form
   const [photoCaption, setPhotoCaption] = useState('');
-  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [photoFiles, setPhotoFiles] = useState<File[]>([]);
   const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<{ current: number; total: number } | null>(null);
 
   // 5. Website Setting Form (Singleton)
   const [churchName, setChurchName] = useState('');
@@ -427,40 +428,76 @@ export const AdminDashboard: React.FC = () => {
   };
 
   // Gallery CRUD
+  const handleRemoveGalleryFile = (index: number) => {
+    const updated = photoFiles.filter((_, i) => i !== index);
+    setPhotoFiles(updated);
+    if (updated.length === 0) {
+      const fileInput = document.getElementById('photoFileInput') as HTMLInputElement;
+      if (fileInput) fileInput.value = '';
+    }
+  };
+
   const handleGallerySubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!photoFile) {
-      addToast('Please select a photo file to upload.', 'warning');
+    if (photoFiles.length === 0) {
+      addToast('Please select at least one photo file to upload.', 'warning');
       return;
     }
 
     setIsUploadingPhoto(true);
-    const formData = new FormData();
-    if (photoCaption.trim()) {
-      formData.append('caption', photoCaption.trim());
-    } else {
-      formData.append('caption', '');
-    }
-    formData.append('image', photoFile);
+    setUploadProgress({ current: 0, total: photoFiles.length });
 
-    try {
-      const res = await api.post('/api/gallery/', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
-      setPhotos([res.data, ...photos]);
-      addToast('Image uploaded to gallery successfully!', 'success');
-      setPhotoCaption('');
-      setPhotoFile(null);
-      // Reset input element
-      const fileInput = document.getElementById('photoFileInput') as HTMLInputElement;
-      if (fileInput) fileInput.value = '';
-    } catch (err: any) {
-      console.error('Gallery upload error:', err);
-      const errMsg = err?.response?.data?.image?.[0] || err?.response?.data?.detail || 'Failed to upload image. Please try again.';
-      addToast(errMsg, 'error');
-    } finally {
-      setIsUploadingPhoto(false);
+    const newUploadedPhotos: any[] = [];
+    let successCount = 0;
+    let failCount = 0;
+
+    for (let i = 0; i < photoFiles.length; i++) {
+      const file = photoFiles[i];
+      setUploadProgress({ current: i + 1, total: photoFiles.length });
+
+      const formData = new FormData();
+      if (photoCaption.trim()) {
+        formData.append('caption', photoCaption.trim());
+      } else {
+        formData.append('caption', '');
+      }
+      formData.append('image', file);
+
+      try {
+        const res = await api.post('/api/gallery/', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        newUploadedPhotos.unshift(res.data);
+        successCount++;
+      } catch (err: any) {
+        console.error(`Gallery upload error for ${file.name}:`, err);
+        failCount++;
+      }
     }
+
+    if (newUploadedPhotos.length > 0) {
+      setPhotos([...newUploadedPhotos, ...photos]);
+    }
+
+    if (failCount === 0) {
+      addToast(
+        photoFiles.length === 1
+          ? 'Image uploaded to gallery successfully!'
+          : `All ${successCount} photos uploaded to gallery successfully!`,
+        'success'
+      );
+    } else if (successCount > 0) {
+      addToast(`${successCount} uploaded successfully, ${failCount} failed.`, 'warning');
+    } else {
+      addToast('Failed to upload photos. Please check file sizes and formats.', 'error');
+    }
+
+    setPhotoCaption('');
+    setPhotoFiles([]);
+    const fileInput = document.getElementById('photoFileInput') as HTMLInputElement;
+    if (fileInput) fileInput.value = '';
+    setIsUploadingPhoto(false);
+    setUploadProgress(null);
   };
 
   const handleDeletePhoto = async (id: number) => {
@@ -1291,45 +1328,133 @@ export const AdminDashboard: React.FC = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">
-                      Select Image File <span className="text-rose-400">*</span>
-                    </label>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400">
+                        Select Photos <span className="text-rose-400">*</span>
+                      </label>
+                      <span className="text-[11px] text-church-gold font-normal">
+                        (Select multiple photos at once)
+                      </span>
+                    </div>
                     <input
                       type="file"
                       id="photoFileInput"
-                      required
+                      required={photoFiles.length === 0}
                       accept="image/*"
-                      onChange={(e) => setPhotoFile(e.target.files ? e.target.files[0] : null)}
+                      multiple
+                      onChange={(e) => {
+                        if (e.target.files) {
+                          setPhotoFiles(Array.from(e.target.files));
+                        }
+                      }}
                       className="block w-full px-3 py-3 border border-slate-800 rounded-2xl bg-slate-900 text-xs focus:outline-none transition-all text-slate-300 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-church-gold/20 file:text-church-gold hover:file:bg-church-gold/30 cursor-pointer"
                     />
                   </div>
 
-                  {photoFile && (
-                    <div className="p-3 bg-slate-900/60 rounded-2xl border border-church-gold/30 flex items-center gap-3">
-                      <img
-                        src={URL.createObjectURL(photoFile)}
-                        alt="Preview"
-                        className="w-14 h-14 object-cover rounded-xl border border-slate-700 shadow-sm"
-                      />
-                      <div className="text-xs text-slate-300 min-w-0">
-                        <p className="font-semibold truncate">{photoFile.name}</p>
-                        <p className="text-[10px] text-slate-400">{(photoFile.size / 1024).toFixed(1)} KB - Ready to upload</p>
+                  {photoFiles.length === 1 && (
+                    <div className="p-3 bg-slate-900/60 rounded-2xl border border-church-gold/30 flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <img
+                          src={URL.createObjectURL(photoFiles[0])}
+                          alt="Preview"
+                          className="w-14 h-14 object-cover rounded-xl border border-slate-700 shadow-sm shrink-0"
+                        />
+                        <div className="text-xs text-slate-300 min-w-0">
+                          <p className="font-semibold truncate">{photoFiles[0].name}</p>
+                          <p className="text-[10px] text-slate-400">{(photoFiles[0].size / 1024).toFixed(1)} KB - Ready to upload</p>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveGalleryFile(0)}
+                        className="p-2 hover:bg-slate-800 text-slate-400 hover:text-rose-400 rounded-xl transition-colors cursor-pointer"
+                        title="Remove photo"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  )}
+
+                  {photoFiles.length > 1 && (
+                    <div className="p-3 bg-slate-900/60 rounded-2xl border border-church-gold/30 space-y-2.5">
+                      <div className="flex items-center justify-between text-xs text-slate-300 border-b border-slate-800 pb-2">
+                        <span className="font-bold text-church-gold">
+                          {photoFiles.length} photos selected
+                        </span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-[10px] text-slate-400 font-mono">
+                            {(photoFiles.reduce((acc, f) => acc + f.size, 0) / (1024 * 1024)).toFixed(2)} MB
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setPhotoFiles([]);
+                              const fileInput = document.getElementById('photoFileInput') as HTMLInputElement;
+                              if (fileInput) fileInput.value = '';
+                            }}
+                            className="text-[10px] text-rose-400 hover:text-rose-300 underline cursor-pointer"
+                          >
+                            Clear all
+                          </button>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-4 sm:grid-cols-5 gap-2 max-h-40 overflow-y-auto pr-1">
+                        {photoFiles.map((file, idx) => (
+                          <div key={idx} className="relative group rounded-xl overflow-hidden aspect-square border border-slate-700 bg-slate-950">
+                            <img
+                              src={URL.createObjectURL(file)}
+                              alt={`Preview ${idx + 1}`}
+                              className="w-full h-full object-cover"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveGalleryFile(idx)}
+                              className="absolute top-1 right-1 p-1 bg-black/80 hover:bg-rose-600 text-white rounded-md opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                              title="Remove"
+                            >
+                              <Trash2 className="w-3 h-3" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {isUploadingPhoto && uploadProgress && (
+                    <div className="space-y-1.5 p-3 rounded-2xl bg-slate-900/80 border border-church-gold/20">
+                      <div className="flex justify-between text-xs text-church-gold font-medium">
+                        <span>Uploading photos individually...</span>
+                        <span>{uploadProgress.current} / {uploadProgress.total}</span>
+                      </div>
+                      <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-church-gold transition-all duration-300 rounded-full"
+                          style={{ width: `${Math.round((uploadProgress.current / uploadProgress.total) * 100)}%` }}
+                        />
                       </div>
                     </div>
                   )}
 
                   <button
                     type="submit"
-                    disabled={isUploadingPhoto}
+                    disabled={isUploadingPhoto || photoFiles.length === 0}
                     className="w-full py-3 bg-church-gold hover:bg-church-gold-hover disabled:opacity-50 text-church-blue text-xs font-bold rounded-2xl transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer"
                   >
                     {isUploadingPhoto ? (
                       <>
                         <Loader className="w-4 h-4 animate-spin" />
-                        <span>Uploading Image...</span>
+                        <span>
+                          {uploadProgress
+                            ? `Uploading ${uploadProgress.current} of ${uploadProgress.total} Photos...`
+                            : 'Uploading Photos...'}
+                        </span>
                       </>
                     ) : (
-                      <span>Upload Image</span>
+                      <span>
+                        {photoFiles.length > 1
+                          ? `Upload ${photoFiles.length} Photos to Gallery`
+                          : 'Upload to Gallery'}
+                      </span>
                     )}
                   </button>
                 </form>

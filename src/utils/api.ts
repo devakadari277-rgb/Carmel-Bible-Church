@@ -20,11 +20,19 @@ export const getMediaUrl = (url: string | null | undefined): string => {
     url.startsWith('blob:') ||
     url.startsWith('data:')
   ) {
+    // If the browser page is HTTPS and the image is HTTP, upgrade to HTTPS to avoid mixed content blocking
+    if (url.startsWith('http://') && typeof window !== 'undefined' && window.location.protocol === 'https:') {
+      return url.replace('http://', 'https://');
+    }
     return url;
   }
   const backendBase = (import.meta.env.VITE_API_URL || '').replace(/\/+$/, '');
   const cleanPath = url.startsWith('/') ? url : `/${url}`;
-  return backendBase ? `${backendBase}${cleanPath}` : cleanPath;
+  const fullUrl = backendBase ? `${backendBase}${cleanPath}` : cleanPath;
+  if (fullUrl.startsWith('http://') && typeof window !== 'undefined' && window.location.protocol === 'https:') {
+    return fullUrl.replace('http://', 'https://');
+  }
+  return fullUrl;
 };
 
 // Interceptor to automatically add JWT access token to headers
